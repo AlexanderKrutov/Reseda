@@ -1,7 +1,7 @@
 # Reseda
-Reseda (abbreviation from **Res**ource **ed**itor for **A**ndroid) is tool for handy management of Android localziation resources.
+Reseda (abbreviation from **Res**ource **ed**itor for **A**ndroid) is tool for handy management of Android localization resources.
 The main idea of the tool is to convert original resource sets (*strings.xml* and *arrays.xml*) to a single CSV file which can be imported to any spreadsheet application for convenient side-by side translation.
-Later, the translated CSV can be exported from spreadsheet editor and conveted back to Android resource files. 
+Later, the translated CSV can be exported from spreadsheet editor and converted back to Android resource files. 
 
 ## General Workflow
   
