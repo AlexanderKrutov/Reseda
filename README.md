@@ -29,7 +29,7 @@ Later, the translated CSV can be exported from spreadsheet editor and converted 
 | `-out-res <dirpath>`    | path to output folder where the generated XML resource files will be placed. |
 | `in-res <dirpath>`      | path to input folder with XML resource files that will be converted to CSV. |
 | `-out-csv <filepath>`   | path to output CSV file with localization resources. |
-| `-locales <locales>`    | list of comma-separated locales. Use it to filter unused localizations.<br>*Example:*<br>`-locales ", ru, en, uk"`<br>means use Default, Russian and Ukrainian locales.<br>Default is `""`. |
+| `-locales <locales>`    | list of comma-separated locales. Use it to filter unused localizations.<br>*Example:*<br>`-locales ", ru, en, uk"`<br>means use Default, Russian, English and Ukrainian locales.<br>Default is `""`. |
 | `-separator <char>`     | CSV separator symbol. Usually `","` or `";"`.<br>Default is `","`. |
 | `-indent <string>`      | XML tree indent string. Only white-space chars allowed.<br>Default is `"  "` (2 spaces). |
 | `-dontexit`             | flag indicating that application will not exit until any key will be pressed. |
