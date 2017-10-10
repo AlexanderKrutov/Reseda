@@ -6,6 +6,9 @@ using System.IO;
 
 namespace Reseda
 {
+    /// <summary>
+    /// Writes CSV file with resources.
+    /// </summary>
     public static class CsvWriter
     {
         public static void Write(ICollection<ResourceSet> locales, string path, string separator)

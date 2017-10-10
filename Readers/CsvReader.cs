@@ -8,6 +8,9 @@ using Microsoft.VisualBasic.FileIO;
 
 namespace Reseda
 {
+    /// <summary>
+    /// Reads resources from CSV file
+    /// </summary>
     public static class CsvReader
     {
         public static List<ResourceSet> Read(string path, string[] locales, string separator)

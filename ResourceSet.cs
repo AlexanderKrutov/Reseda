@@ -22,7 +22,9 @@ namespace Reseda
         /// </summary>
         public string Locale { get; private set; }
 
-
+        /// <summary>
+        /// Displayable locale name
+        /// </summary>
         public string LocaleName
         {
             get
@@ -55,6 +57,10 @@ namespace Reseda
             }
         }
 
+        /// <summary>
+        /// Gets folder name for the resource set.
+        /// For example, "values" or "values-ru"
+        /// </summary>
         public string ValuesFolder
         {
             get

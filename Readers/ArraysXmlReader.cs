@@ -8,6 +8,9 @@ using System.Xml;
 
 namespace Reseda
 {
+    /// <summary>
+    /// Reads array resources from XML file
+    /// </summary>
     public static class ArraysXmlReader
     {
         public static List<ResourceItem> Read(string path)

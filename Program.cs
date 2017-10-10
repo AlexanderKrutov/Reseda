@@ -20,14 +20,15 @@ namespace Reseda
 
                 for (int i = 0; i < Config.Locales.Length; i++)
                 {
-                    var strings = StringsXmlReader.Read(Path.Combine(Config.InResFolder, "values" + (string.IsNullOrEmpty(Config.Locales[i]) ? "" : "-" + Config.Locales[i]), "strings.xml"));
-                    var arrays = ArraysXmlReader.Read(Path.Combine(Config.InResFolder, "values" + (string.IsNullOrEmpty(Config.Locales[i]) ? "" : "-" + Config.Locales[i]), "arrays.xml"));
-
                     ResourceSet resourceSet = new ResourceSet(Config.Locales[i]);
+
+                    var strings = StringsXmlReader.Read(Path.Combine(Config.InResFolder, resourceSet.ValuesFolder, "strings.xml"));
+                    var arrays = ArraysXmlReader.Read(Path.Combine(Config.InResFolder, resourceSet.ValuesFolder, "arrays.xml"));
+
                     resourceSet.AddRange(strings);
                     resourceSet.AddRange(arrays);
 
-                    Console.WriteLine($"Loaded {resourceSet.StringsCount} strings for locale `{resourceSet.Locale}`");
+                    Console.WriteLine($"Loaded {resourceSet.StringsCount} strings for locale `{resourceSet.LocaleName}`");
 
                     resourceSets.Add(resourceSet);
                 }

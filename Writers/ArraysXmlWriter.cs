@@ -8,6 +8,9 @@ using System.Xml;
 
 namespace Reseda
 {
+    /// <summary>
+    /// Writes resources to `arrays.xml` file.
+    /// </summary>
     public static class ArraysXmlWriter
     {
         private const string NEWLINE = "\n";

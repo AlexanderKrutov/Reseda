@@ -6,6 +6,9 @@ using System.Xml;
 
 namespace Reseda
 {
+    /// <summary>
+    /// Reads string resources from XML file
+    /// </summary>
     public static class StringsXmlReader
     {
         public static List<ResourceItem> Read(string path)

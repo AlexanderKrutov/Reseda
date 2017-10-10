@@ -5,6 +5,9 @@ using System.Xml;
 
 namespace Reseda
 {
+    /// <summary>
+    /// Writes resources to `strings.xml` file.
+    /// </summary>
     public static class StringsXmlWriter
     {
         private const string NEWLINE = "\n";

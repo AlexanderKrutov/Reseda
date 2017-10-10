@@ -9,17 +9,55 @@ using System.Threading.Tasks;
 
 namespace Reseda
 {
+    /// <summary>
+    /// Contains application run config
+    /// </summary>
     public static class Config
     {
+        /// <summary>
+        /// Array of resources' locales, like "ru", "en", "de" to process
+        /// </summary>
         public static string[] Locales { get; private set; }
+
+        /// <summary>
+        /// Path to input CSV file with resources
+        /// </summary>
         public static string InCsv { get; private set; }
+
+        /// <summary>
+        /// Path to output folder with Android resources
+        /// </summary>
         public static string OutResFolder { get; private set; }
+
+        /// <summary>
+        /// Path to input folder with Android resources
+        /// </summary>
         public static string InResFolder { get; private set; }
+
+        /// <summary>
+        /// Path to output CSV file 
+        /// </summary>
         public static string OutCsv { get; private set; }
+
+        /// <summary>
+        /// CSV separator character 
+        /// </summary>
         public static string Separator { get; private set; }
+
+        /// <summary>
+        /// Indentation symbol(s) to format output XML files; like "\t" or "  " (double space)
+        /// </summary>
         public static string Indent { get; private set; }
+
+        /// <summary>
+        /// Flag indicating the Reseda tool should not exit after run and has to wait for user input
+        /// </summary>
         public static bool DontExit { get; private set; }
 
+        /// <summary>
+        /// Parses application command line arguments
+        /// </summary>
+        /// <param name="args"></param>
         public static void Parse(string[] args)
         {
             if (args.Length == 0)
@@ -28,7 +66,7 @@ namespace Reseda
                 return;
             }
 
-            for (int i=0; i<args.Length; i++)
+            for (int i = 0; i < args.Length; i++)
             {
                 if (args[i].StartsWith("-"))
                 {
@@ -74,7 +112,7 @@ namespace Reseda
 
                         default:
                             Console.WriteLine($"Unknown parameter `{args[i]}`.");
-                            Console.WriteLine($"Type `-help` to get command line parameters reference.");
+                            PrintTip();
                             Program.Exit(-1);
                             break;
                     }
@@ -99,33 +137,40 @@ namespace Reseda
 
             if (string.IsNullOrEmpty(InResFolder) && !string.IsNullOrEmpty(OutCsv))
             {
-                Console.WriteLine($"You specified `-out-csv` parameter but missed `-in-res` parameter.");
+                Console.WriteLine($"You've specified `-out-csv` parameter but have missed `-in-res` parameter.");
                 Program.Exit(-1);
             }
 
             if (!string.IsNullOrEmpty(InResFolder) && string.IsNullOrEmpty(OutCsv))
             {
-                Console.WriteLine($"You specified `-in-res` parameter but missed `-out-csv` parameter.");
+                Console.WriteLine($"You've specified `-in-res` parameter but missed `-out-csv` parameter.");
                 Program.Exit(-1);
             }
 
             if (string.IsNullOrEmpty(InCsv) && !string.IsNullOrEmpty(OutResFolder))
             {
-                Console.WriteLine($"You specified `-out-res` parameter but missed `-in-csv` parameter.");
+                Console.WriteLine($"You've specified `-out-res` parameter but missed `-in-csv` parameter.");
                 Program.Exit(-1);
             }
 
             if (!string.IsNullOrEmpty(InCsv) && string.IsNullOrEmpty(OutResFolder))
             {
-                Console.WriteLine($"You specified `-in-csv` parameter but missed `-out-res` parameter.");
+                Console.WriteLine($"You've specified `-in-csv` parameter but missed `-out-res` parameter.");
+                Program.Exit(-1);
+            }
+
+            if (string.IsNullOrEmpty(InCsv) && 
+                string.IsNullOrEmpty(InResFolder))
+            {
+                Console.WriteLine($"There are no input files/folders provided.");
+                PrintTip();
                 Program.Exit(-1);
             }
 
             // locales
             if (Locales == null || !Locales.Any())
             {
-                Console.WriteLine($"`-locales` parameter value is missed.");
-                Program.Exit(-1);
+                Locales = new[] { "" };
             }
 
             // separator
@@ -146,7 +191,6 @@ namespace Reseda
             }
 
             // check paths
-
             if (!string.IsNullOrEmpty(InCsv) && !File.Exists(InCsv))
             {
                 Console.WriteLine($"`{InCsv}` is not exist or not a valid file name/path.");
@@ -165,7 +209,7 @@ namespace Reseda
             if (index + 1 >= args.Length)
             {
                 Console.WriteLine($"Command line parameter `{args[index]}` requires value.");
-                Console.WriteLine($"Type `-help` to get command line parameters reference.");
+                PrintTip();
                 Program.Exit(-1);
                 return null;
             }
@@ -199,12 +243,18 @@ namespace Reseda
             return localesList.ToArray();
         }
 
+        private static void PrintTip()
+        {
+            Console.WriteLine($"Type `-help` to get command line parameters reference.");
+        }
+
         private static void PrintHelp()
         {
-
             string help = @"
 Welcome to RESEDA ver 0.1
 =========================
+
+See http://github.com/AlexanderKrutov/Reseda for complete guide.
 
 Command line reference:
 
@@ -223,6 +273,7 @@ Command line reference:
                       Example:
                       -locales "" , ru, en, uk"" 
                       means use Default, Russian and Ukrainian locales.
+                      Default is """".
 
 -separator <char>   - CSV separator symbol. Usually "","" or "";"".
                       Default is "","".
@@ -233,7 +284,8 @@ Command line reference:
 -dontexit           - flag indicating that application will not exit 
                       until any key will be pressed.
 
--h | -help          - prints this help.";
+-h | -help          - prints this help.
+";
 
             Console.WriteLine(help);
             Program.Exit(0);
