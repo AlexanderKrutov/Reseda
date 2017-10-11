@@ -6,9 +6,9 @@ Reseda (abbreviation from **Res**ource **ed**itor for **A**ndroid) is tool for h
 The main idea of the tool is to convert original resource sets (*strings.xml* and *arrays.xml*) to a single CSV file which can be imported to any spreadsheet application for convenient side-by side translation.
 Later, the translated CSV can be exported from spreadsheet editor and converted back to Android resource files. 
 
-## What it is not
-* not a translation tool
-* not a spreadsheet editor
+## What Reseda is not
+* Reseda is not a translation tool
+* Reseda is not a spreadsheet editor
 
 ## General Usage
   
@@ -47,18 +47,23 @@ TODO
 
 ## CSV File Format
 Reseda uses CSV ([Comma Separated Values](https://en.wikipedia.org/wiki/Comma-separated_values)) file format for interchanging between Android localization resources and spreadsheet editors.
-The file should matche special agreements or rules in order to be correctly procecced by Reseda tool.
+The file should match special agreements or rules in order to be correctly processed by Reseda tool.
 
 ### File Header
-First line of the CSV file is a special header which contains information about columns.
+First line of the CSV file is a special header that contains information about columns.
 Header columns are following:
-* 1<sup>st</sup> `META` - Meta column;
-* 2<sup>nd</sup> `NAME` - Resource Item Name;
-* 3<sup>rd</sup> `Default` - Value of resource item for default localization;
-* 4..N<sup>th</sup> `Locales` - Each column corresponds to a specific localization;
-* N+1<sup>th</sup> `COMMENTS` - Contains documentation for the resource item
 
-Other lines contains information about resource items that can be processed by Reseda.
+| Column # | Title        | Description |
+|----------|--------------|-------------|
+| 1        | `META`       | Meta column. Has special markers to instruct Reseda how the resource item should be processed. See below. |
+| 2        | `NAME`       | Resource item name. It can be name of Android string resource item name, Android array resource name or comment text. |
+| 3        | `Default`    | Value of resource item for default localization. |
+| 4        | `<locale_1>` | Value of resource item for localization `<locale_1>`. | 
+| ...      | ...          | ... |
+| N        | `<locale_N>` | Value of resource item for localization `<locale_N>`. `N` is a number of application localizations. For example if an app has default localization (English) and additional localizations `ru`, `de`, `N` is 2. |
+| N+1      | `COMMENTS`   | Optional comments column. Contains documentation for the resource item. This is a content of `documentation` attribute of Android resource item.
+
+Lines 2 contain values of resource items that can be processed by Reseda.
 
 ### Meta Column
 Contains information how the resource item should be processed.
