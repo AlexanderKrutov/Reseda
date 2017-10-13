@@ -75,4 +75,4 @@ There are several markers that the column can contain:
 | `#`    | The comment that should get into output resource file. |
 | `a`    | The array item. Rows marked with this meta symbol will get into `arrays.xml` file. |
 | `f`    | The *un**F**ormatted* marker. Attribute `formatted="false"` will be added to such resource items. |
-| `t`    | The *un**T**ranslatable* marker. Resource items marked with this meta symbol should be present in default localization resource set, but will not get into other localizations. |
+| `t`    | The *un**T**ranslatable* marker. Resource items marked with this meta symbol should be present in default localization resource set, but will not get into other localizations. Attribute `translatable="false"` will be added to such resource items. |
