@@ -68,8 +68,11 @@ Lines 2 contain values of resource items that can be processed by Reseda.
 ### Meta Column
 Contains information how the resource item should be processed.
 There are several markers that the column can contain:
-* `-`
-* `#`
-* `a`
-* `f`
-* `t`
+
+| Marker | Meaning |
+|--------|---------|
+| `-`    | The row should be excluded from the resource items list while processing CSV file. Use it for temporarily excluding strings or for internal CSV comments that should not get into output resource files. |
+| `#`    | The comment that should get into output resource file. |
+| `a`    | The array item. Rows marked with this meta symbol will get into `arrays.xml` file. |
+| `f`    | The *un**F**ormatted* marker. Attribute `formatted="false"` will be added to such resource items. |
+| `t`    | The *un**T**ranslatable* marker. Resource items marked with this meta symbol should be present in default localization resource set, but will not get into other localizations. |
