@@ -34,7 +34,7 @@ Later, the translated CSV can be exported from spreadsheet editor and converted 
 |-------------------------|-------------|
 | `-in-csv <filepath>`    | path to input CSV file with localization resources. |
 | `-out-res <dirpath>`    | path to output folder where the generated XML resource files will be placed. |
-| `in-res <dirpath>`      | path to input folder with XML resource files that will be converted to CSV. |
+| `-in-res <dirpath>`      | path to input folder with XML resource files that will be converted to CSV. |
 | `-out-csv <filepath>`   | path to output CSV file with localization resources. |
 | `-locales <locales>`    | list of comma-separated locales. Use it to filter unused localizations.<br>*Example:*<br>`-locales ", ru, en, uk"`<br>means use Default, Russian, English and Ukrainian locales.<br>Default is `""`. |
 | `-separator <char>`     | CSV separator symbol. Usually `","` or `";"`.<br>Default is `","`. |
