@@ -34,12 +34,14 @@ Later, the translated CSV can be exported from spreadsheet editor and converted 
 |-------------------------|-------------|
 | `-in-csv <filepath>`    | path to input CSV file with localization resources. |
 | `-out-res <dirpath>`    | path to output folder where the generated XML resource files will be placed. |
-| `in-res <dirpath>`      | path to input folder with XML resource files that will be converted to CSV. |
+| `-in-res <dirpath>`      | path to input folder with XML resource files that will be converted to CSV. |
 | `-out-csv <filepath>`   | path to output CSV file with localization resources. |
-| `-locales <locales>`    | list of comma-separated locales. Use it to filter unused localizations.<br>*Example:*<br>`-locales ", ru, en, uk"`<br>means use Default, Russian, English and Ukrainian locales.<br>Default is `""`. |
+| `-locales <locales>`    | list of comma-separated locales. Use it to filter unused localizations.<br>*Example:*<br>`-locales "ru, en, uk"`<br>means use default (always ON), Russian, English and Ukrainian locales. |
 | `-separator <char>`     | CSV separator symbol. Usually `","` or `";"`.<br>Default is `","`. |
 | `-indent <string>`      | XML tree indent string. Only white-space chars allowed.<br>Default is `"  "` (2 spaces). |
 | `-dontexit`             | flag indicating that application will not exit until any key will be pressed. |
+| `-keep-empty-rows`      | keep empty rows on converting resources from XML to CSV and vise versa. |
+| `-force-untranslated`   | force untranslated strings, i.e. if the flag is ON, missing translations to be replaced with values from default locale. |
 | `-h` or `-help`         | prints the help. |
 
 ## Samples
@@ -57,11 +59,11 @@ Header columns are following:
 |----------|--------------|-------------|
 | 1        | `META`       | Meta column. Has special markers to instruct Reseda how the resource item should be processed. See below. |
 | 2        | `NAME`       | Resource item name. It can be name of Android string resource item name, Android array resource name or comment text. |
-| 3        | `Default`    | Value of resource item for default localization. |
+| 3        |              | Value of resource item for default localization. |
 | 4        | `<locale_1>` | Value of resource item for localization `<locale_1>`. | 
 | ...      | ...          | ... |
 | N        | `<locale_N>` | Value of resource item for localization `<locale_N>`. `N` is a number of application localizations. For example if an app has default localization (English) and additional localizations `ru`, `de`, `N` is 2. |
-| N+1      | `COMMENTS`   | Optional comments column. Contains documentation for the resource item. This is a content of `documentation` attribute of Android resource item.
+| N+1      | `DOCS`      | Optional documentation column, content of `documentation` attribute of Android resource item.
 
 Lines 2 contain values of resource items that can be processed by Reseda.
 
@@ -73,6 +75,5 @@ There are several markers that the column can contain:
 |--------|---------|
 | `-`    | The row should be excluded from the resource items list while processing CSV file. Use it for temporarily excluding strings or for internal CSV comments that should not get into output resource files. |
 | `#`    | The comment that should get into output resource file. |
-| `a`    | The array item. Rows marked with this meta symbol will get into `arrays.xml` file. |
 | `f`    | The *un**F**ormatted* marker. Attribute `formatted="false"` will be added to such resource items. |
 | `t`    | The *un**T**ranslatable* marker. Resource items marked with this meta symbol should be present in default localization resource set, but will not get into other localizations. Attribute `translatable="false"` will be added to such resource items. |

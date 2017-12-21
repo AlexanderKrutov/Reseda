@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Reseda.Readers;
+using Reseda.Writers;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.IO;
 
 namespace Reseda
 {
@@ -11,86 +13,87 @@ namespace Reseda
     {
         static void Main(string[] args)
         {
+            WriteLine("");
+            WriteLine("╔════════╤══════════════════════════════════════════╗", ConsoleColor.DarkCyan);
+            WriteLine("║ Reseda │ http://github.com/AlexanderKrutov/Reseda ║", ConsoleColor.DarkCyan);
+            WriteLine("╚════════╧══════════════════════════════════════════╝", ConsoleColor.DarkCyan);
+            WriteLine("");
+
             Config.Parse(args);
-           
-            // XML => CSV
-            if (!string.IsNullOrEmpty(Config.InResFolder))
-            {
-                List<ResourceSet> resourceSets = new List<ResourceSet>();
-
-                for (int i = 0; i < Config.Locales.Length; i++)
-                {
-                    ResourceSet resourceSet = new ResourceSet(Config.Locales[i]);
-
-                    var strings = StringsXmlReader.Read(Path.Combine(Config.InResFolder, resourceSet.ValuesFolder, "strings.xml"));
-                    var arrays = ArraysXmlReader.Read(Path.Combine(Config.InResFolder, resourceSet.ValuesFolder, "arrays.xml"));
-
-                    resourceSet.AddRange(strings);
-                    resourceSet.AddRange(arrays);
-
-                    Console.WriteLine($"Loaded {resourceSet.StringsCount} strings for locale `{resourceSet.LocaleName}`");
-
-                    resourceSets.Add(resourceSet);
-                }
-
-                CsvWriter.Write(resourceSets, Config.OutCsv, Config.Separator);
-            }
 
             // CSV => XML
             if (!string.IsNullOrEmpty(Config.OutResFolder))
             {
-                var resourceSets = CsvReader.Read(Config.InCsv, Config.Locales, Config.Separator);
-                foreach (var resourceSet in resourceSets)
-                {
-                    string stringsFile = Path.Combine(Config.OutResFolder, resourceSet.ValuesFolder, "strings.xml");
-                    string arraysFile = Path.Combine(Config.OutResFolder, resourceSet.ValuesFolder, "arrays.xml");
-
-                    string dir = "";
-                    try
-                    {
-                        dir = Path.GetDirectoryName(stringsFile);
-                        Directory.CreateDirectory(dir);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Unable to create out directory `{dir}`. Reason: " + ex.Message);
-                        Program.Exit(-1);
-                        return;
-                    }
-
-                    try
-                    {
-                        dir = Path.GetDirectoryName(arraysFile);
-                        Directory.CreateDirectory(dir);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Unable to create out directory `{dir}`. Reason: " + ex.Message);
-                        Program.Exit(-1);
-                        return;
-                    }
-
-                    Console.Write($"Writing resources for locale `{resourceSet.LocaleName}`... ");
-
-                    StringsXmlWriter.Write(stringsFile, resourceSet, Config.Indent);
-                    ArraysXmlWriter.Write(arraysFile, resourceSet, Config.Indent);
-
-                    Console.WriteLine($"Done (arrays: {resourceSet.ArraysCount}, strings: {resourceSet.StringsCount}).");
-                }
+                Program.WriteLine("Task: CSV to XML", ConsoleColor.DarkGray);
+                XmlWriter.Write(CsvReader.Read());
             }
 
-            Console.WriteLine("Done.");
-            Exit(0);
+            // XML => CSV
+            if (!string.IsNullOrEmpty(Config.InResFolder))
+            {
+                CsvWriter.Write(XmlReader.Read());
+            }
+
+            WriteLineAndExit("SUCCESS", 0, ConsoleColor.Green);
         }
 
         public static void Exit(int code)
         {
             if (Config.DontExit)
             {
-                Console.WriteLine("Press any key to exit...");
+                WriteLine("Press any key to exit...");
                 Console.ReadKey();
             }
             Environment.Exit(code);
+        }
+
+
+        public static void Write(string text, ConsoleColor? color = null)
+        {
+            Write(text, false, color, null);
+        }
+
+        public static void WriteLine(string text, ConsoleColor? color = null)
+        {
+            Write(text, true, color, null);
+        }
+
+        public static void WriteAndExit(string text, int exitCode, ConsoleColor? color = null)
+        {
+            Write(text, false, color, exitCode);
+        }
+
+        public static void WriteLineAndExit(string text, int exitCode, ConsoleColor? color = null)
+        {
+            Write(text, true, color, exitCode);
+        }
+
+        private static void Write(string text, bool terminateLine, ConsoleColor? color, int? exitCode)
+        {
+            ConsoleColor savedColor = Console.ForegroundColor;
+            if (color != null)
+            {
+                Console.ForegroundColor = color.Value;
+            }
+
+            if (terminateLine)
+            {
+                Console.WriteLine(text);
+            }
+            else
+            {
+                Console.Write(text);
+            }
+
+            if (color != null)
+            {
+                Console.ForegroundColor = savedColor;
+            }
+
+            if (exitCode != null)
+            {
+                Exit(exitCode.Value);
+            }
         }
     }
 }

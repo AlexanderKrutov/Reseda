@@ -50,6 +50,16 @@ namespace Reseda
         public static string Indent { get; private set; }
 
         /// <summary>
+        /// Keep empty rows on converting resources to CSV and vise versa
+        /// </summary>
+        public static bool KeepEmptyRows { get; private set; }
+
+        /// <summary>
+        /// Force untranslated strings
+        /// </summary>
+        public static bool ForceUntranslated { get; private set; }
+
+        /// <summary>
         /// Flag indicating the Reseda tool should not exit after run and has to wait for user input
         /// </summary>
         public static bool DontExit { get; private set; }
@@ -101,6 +111,14 @@ namespace Reseda
                             Indent = Regex.Unescape(GetParameterValue(args, i) ?? "");
                             break;
 
+                        case "-keep-empty-rows":
+                            KeepEmptyRows = true;
+                            break;
+
+                        case "-force-untranslated":
+                            ForceUntranslated = true;
+                            break;
+
                         case "-dontexit":
                             DontExit = true;
                             break;
@@ -111,9 +129,8 @@ namespace Reseda
                             break;
 
                         default:
-                            Console.WriteLine($"Unknown parameter `{args[i]}`.");
+                            Program.WriteLine($"Unknown parameter `{args[i]}`.", ConsoleColor.Red);
                             PrintTip();
-                            Program.Exit(-1);
                             break;
                     }
                 }
@@ -123,54 +140,54 @@ namespace Reseda
 
             if (!string.IsNullOrEmpty(InCsv) && !string.IsNullOrEmpty(InResFolder))
             {
-                Console.WriteLine($"Only one `-in-...` parameter can be applied at the same time. Use `-in-res` OR `-in-csv` depending on what you need.");
-                Program.Exit(-1);
+                Program.WriteLineAndExit($"Only one `-in-...` parameter can be applied at the same time. Use `-in-res` OR `-in-csv` depending on what you need.", -1);
             }
 
             if (!string.IsNullOrEmpty(OutCsv) && !string.IsNullOrEmpty(OutResFolder))
             {
-                Console.WriteLine($"Only one `-out-...` parameter can be applied at the same time. Use `-out-res` OR `-out-csv` depending on what you need.");
-                Program.Exit(-1);
+                Program.WriteLineAndExit($"Only one `-out-...` parameter can be applied at the same time. Use `-out-res` OR `-out-csv` depending on what you need.", -1);
             }
 
             // missed parameter pairs
 
             if (string.IsNullOrEmpty(InResFolder) && !string.IsNullOrEmpty(OutCsv))
             {
-                Console.WriteLine($"You've specified `-out-csv` parameter but have missed `-in-res` parameter.");
-                Program.Exit(-1);
+                Program.WriteLineAndExit($"You've specified `-out-csv` parameter but have missed `-in-res` parameter.", -1);
             }
 
             if (!string.IsNullOrEmpty(InResFolder) && string.IsNullOrEmpty(OutCsv))
             {
-                Console.WriteLine($"You've specified `-in-res` parameter but missed `-out-csv` parameter.");
-                Program.Exit(-1);
+                Program.WriteLineAndExit($"You've specified `-in-res` parameter but missed `-out-csv` parameter.", -1);
             }
 
             if (string.IsNullOrEmpty(InCsv) && !string.IsNullOrEmpty(OutResFolder))
             {
-                Console.WriteLine($"You've specified `-out-res` parameter but missed `-in-csv` parameter.");
-                Program.Exit(-1);
+                Program.WriteLineAndExit($"You've specified `-out-res` parameter but missed `-in-csv` parameter.", -1);
             }
 
             if (!string.IsNullOrEmpty(InCsv) && string.IsNullOrEmpty(OutResFolder))
             {
-                Console.WriteLine($"You've specified `-in-csv` parameter but missed `-out-res` parameter.");
-                Program.Exit(-1);
+                Program.WriteLineAndExit($"You've specified `-in-csv` parameter but missed `-out-res` parameter.", -1);
             }
 
-            if (string.IsNullOrEmpty(InCsv) && 
+            if (string.IsNullOrEmpty(InCsv) &&
                 string.IsNullOrEmpty(InResFolder))
             {
-                Console.WriteLine($"There are no input files/folders provided.");
+                Program.WriteLine($"There are no input files/folders provided.");
                 PrintTip();
-                Program.Exit(-1);
             }
 
             // locales
             if (Locales == null || !Locales.Any())
             {
-                Locales = new[] { "" };
+                if (!string.IsNullOrEmpty(InResFolder))
+                {
+                    Locales = Directory.GetDirectories(InResFolder, "values-*").Select(d => Path.GetFileName(d).Substring("values-".Length)).ToArray();
+                }
+                else
+                {
+                    Locales = new string[0];
+                }
             }
 
             // separator
@@ -186,21 +203,18 @@ namespace Reseda
             }
             else if (!string.IsNullOrWhiteSpace(Indent))
             {
-                Console.WriteLine($"`-indent` parameter can have only white-space characters.");
-                Program.Exit(-1);
+                Program.WriteLineAndExit($"`-indent` parameter can have only white-space characters.", -1);
             }
 
             // check paths
             if (!string.IsNullOrEmpty(InCsv) && !File.Exists(InCsv))
             {
-                Console.WriteLine($"`{InCsv}` is not exist or not a valid file name/path.");
-                Program.Exit(-1);
+                Program.WriteLineAndExit($"`{InCsv}` is not exist or not a valid file name/path.", -1);
             }
 
             if (!string.IsNullOrEmpty(InResFolder) && !Directory.Exists(InResFolder))
             {
-                Console.WriteLine($"`{InResFolder}` folder is not exist or not a valid directory path.");
-                Program.Exit(-1);
+                Program.WriteLineAndExit($"`{InResFolder}` folder is not exist or not a valid directory path.", -1);
             }
         }
 
@@ -208,9 +222,8 @@ namespace Reseda
         {
             if (index + 1 >= args.Length)
             {
-                Console.WriteLine($"Command line parameter `{args[index]}` requires value.");
+                Program.WriteLine($"Command line parameter `{args[index]}` requires value.");
                 PrintTip();
-                Program.Exit(-1);
                 return null;
             }
             else
@@ -234,8 +247,7 @@ namespace Reseda
 
                 if (cultures.FirstOrDefault(c => c.Name == loc || c.TwoLetterISOLanguageName == loc) == null)
                 {
-                    Console.WriteLine($"Locale name `{loc}` is incorrect.");
-                    Program.Exit(-1);
+                    Program.WriteLineAndExit($"Locale name `{loc}` is incorrect.", -1, ConsoleColor.Red);
                     return null;
                 }
             }
@@ -245,16 +257,12 @@ namespace Reseda
 
         private static void PrintTip()
         {
-            Console.WriteLine($"Type `-help` to get command line parameters reference.");
+            Program.WriteLineAndExit($"Type `-help` to get command line parameters reference.", -1);
         }
 
         private static void PrintHelp()
         {
             string help = @"
-Welcome to RESEDA ver 0.1
-=========================
-
-See http://github.com/AlexanderKrutov/Reseda for complete guide.
 
 Command line reference:
 
@@ -271,9 +279,8 @@ Command line reference:
 -locales <locales>  - list of comma-separated locales. Use it to filter 
                       unused localizations. 
                       Example:
-                      -locales "" , ru, en, uk"" 
+                      -locales ""ru, en, uk"" 
                       means use Default, Russian and Ukrainian locales.
-                      Default is """".
 
 -separator <char>   - CSV separator symbol. Usually "","" or "";"".
                       Default is "","".
@@ -281,14 +288,20 @@ Command line reference:
 -indent <string>    - XML tree indent string. Only white-space chars allowed.
                       Default is ""  "" (2 spaces).
 
+-keep-empty-rows    - keep empty rows on converting resources.
+
+-force-untranslated - force untranslated strings.
+                      If a string item is translatable but has 
+                      missing translation, its value will be 
+                      taken from default locale.
+
 -dontexit           - flag indicating that application will not exit 
                       until any key will be pressed.
 
 -h | -help          - prints this help.
 ";
 
-            Console.WriteLine(help);
-            Program.Exit(0);
+            Program.WriteLineAndExit(help, 0);
         }
     }
 }

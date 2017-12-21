@@ -1,31 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.IO;
+using System.Threading.Tasks;
 
-namespace Reseda
+namespace Reseda.Writers
 {
     /// <summary>
     /// Writes CSV file with resources.
     /// </summary>
     public static class CsvWriter
     {
-        public static void Write(ICollection<ResourceSet> locales, string path, string separator)
+        public static void Write(List<DataItem> items)
         {
+            string path = Config.OutCsv;
+
             try
             {
                 string dir = Path.GetDirectoryName(path);
-                if (!String.IsNullOrEmpty(dir))
+                if (!string.IsNullOrEmpty(dir))
                 {
                     Directory.CreateDirectory(dir);
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Unable to create directories for path `{path}`. Reason: " + ex.Message);
-                Program.Exit(-1);
-                return;
+                Program.WriteAndExit($"Unable to create directories for path `{path}`. Reason: {ex.Message}", -1);
             }
 
             StreamWriter fileWriter = null;
@@ -35,96 +36,53 @@ namespace Reseda
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Unable to create file `{path}`. Reason: " + ex.Message);
-                Program.Exit(-1);
-                return;
+                Program.WriteLineAndExit($"Unable to create file `{path}`. Reason: {ex.Message}", -1, ConsoleColor.Red);
             }
 
             string quote = "\"";
-
-            ResourceSet baseLocale = locales.First();
+            string separator = Config.Separator;
 
             StringBuilder line = new StringBuilder();
 
             // header line
             line.Append($"{quote}META{quote}{separator}");
             line.Append($"{quote}NAME{quote}{separator}");
-            for (int i = 0; i < locales.Count; i++)
+            line.Append($"{quote}{quote}{separator}");
+            foreach (string locale in Config.Locales)
             {
-                line.Append($"{quote}{locales.ElementAt(i).Locale}{quote}{separator}");
+                line.Append($"{quote}{locale}{quote}{separator}");
             }
-            line.Append($"{quote}COMMENTS{quote}");
+
+            line.Append($"{quote}DOCS{quote}");
             fileWriter.WriteLine(line.ToString());
 
-            foreach (var item in baseLocale)
-            { 
+            Program.Write($"Writing resources to `{Path.GetFileName(path)}` file ... ");
+
+            foreach (var item in items)
+            {
                 line.Clear();
 
-                StringBuilder meta = new StringBuilder();
-                if (item.IsArrayItem)
-                {
-                    meta.Append(Meta.ARRAY);
-                }
-
-                // comment
+                // column #1 - meta 
+                line.Append($"{quote}{item.Meta}{quote}{separator}");
+   
                 if (item.IsComment)
                 {
-                    meta.Append(Meta.COMMENT);
-
-                    // add empty row before comment
-                    fileWriter.WriteLine($"{quote}{Meta.UNUSED}{quote}{separator}");
-
-                    // column #1 - meta (comment sign)
-                    line.Append($"{quote}{meta.ToString()}{quote}{separator}");
-
                     // column #2 - comment text
-                    line.Append($"{quote}{item.Value.CsvEscape()}{quote}{separator}");
+                    line.Append($"{quote}{item.Values[""].CsvEscape()}{quote}{separator}");
                 }
                 // resource value
                 else
                 {
-                    if (!item.IsFormatted)
-                    {
-                        meta.Append(Meta.FORMATTED);
-                    }
-                    if (!item.IsTranslatable)
-                    {
-                        meta.Append(Meta.TRANSLATABLE);
-                    }
-
-                    // column #1 - meta
-                    line.Append($"{quote}{meta.ToString()}{quote}{separator}");
-
                     // column #2 - resource name
                     line.Append($"{quote}{item.Name.CsvEscape()}{quote}{separator}");
 
                     // column #3 - base locale resource value
-                    line.Append($"{quote}{item.Value.CsvEscape()}{quote}{separator}");
+                    line.Append($"{quote}{item.Values[""].CsvEscape()}{quote}{separator}");
 
                     // column #4 ... #N - other locales
-                    for (int i = 1; i < locales.Count; i++)
-                    {
-                        var secondLocaleStringItems = locales.ElementAt(i).Where(itm => itm.Name == item.Name).ToList();
-                        if (secondLocaleStringItems.Any())
-                        {
-                            string value = null;
-                            // array item
-                            if (item.IsArrayItem)
-                            {
-                                var baseLocaleStringItems = baseLocale.Where(itm => itm.Name == item.Name).ToList();
-                                var arrayIndex = baseLocaleStringItems.FindIndex(itm => itm == item);
-                                if (arrayIndex < secondLocaleStringItems.Count)
-                                {
-                                    value = secondLocaleStringItems.ElementAt(arrayIndex).Value;
-                                }             
-                            }
-                            // string item
-                            else
-                            {
-                                value = secondLocaleStringItems.First().Value;
-                            }
-                            line.Append($"{quote}{value.CsvEscape()}{quote}{separator}");
-                        }                        
+                    foreach (string locale in Config.Locales)
+                    { 
+                        line.Append($"{quote}{(item.Values.ContainsKey(locale) ? item.Values[locale].CsvEscape() : "")}{quote}{separator}");
                     }
 
                     // column #N+1 - documentation
@@ -136,6 +94,9 @@ namespace Reseda
 
             fileWriter.Flush();
             fileWriter.Close();
+
+            Program.WriteLine("Done.", ConsoleColor.DarkGreen);
+            Program.WriteLine("");
         }
 
         public static string CsvEscape(this string str)
