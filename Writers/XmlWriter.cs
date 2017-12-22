@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -101,7 +102,7 @@ namespace Reseda.Writers
 
                     if (!item.IsFormatted)
                     {
-                        resourceString.SetAttribute("formatted", "false");
+                        resourceString.SetAttribute("formatted", "false");                        
                     }
 
                     if (!item.IsTranslatable)
@@ -114,6 +115,12 @@ namespace Reseda.Writers
                         resourceString.SetAttribute("documentation", item.Documentation);
                     }
 
+                    // Escape apostrophes:
+                    if (value.Contains("'"))
+                    {
+                        value = Regex.Replace(value, @"([^\\])(\')", @"$1\'");
+                    }
+                        
                     resourceString.InnerXml = value;
                     resources.AppendChild(doc.CreateWhitespace(indent));
                     resources.AppendChild(resourceString);
